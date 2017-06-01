@@ -10,9 +10,15 @@ import javax.swing.plaf.basic.BasicSplitPaneUI;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.font.TextAttribute;
+import java.util.Collections;
 
+import static java.util.Collections.singletonMap;
 import static javax.swing.BorderFactory.*;
 import static javax.swing.BorderFactory.createMatteBorder;
+import static javax.swing.Box.createHorizontalGlue;
+import static javax.swing.Box.createVerticalStrut;
+import static net.sourceforge.jnlp.util.Boxer.*;
 
 /**
  * User: alexkasko
@@ -43,7 +49,7 @@ public class UITest {
                     frame.setSize(640, 480);
                     frame.setLocationRelativeTo(null);
 
-                    Boxer.highlightBorders(frame.getContentPane());
+//                    Boxer.highlightBorders(frame.getContentPane());
 
                     frame.setVisible(true);
                     edtThreadHolder[0] = Thread.currentThread();
@@ -69,6 +75,9 @@ public class UITest {
     private static JFrame testFrame() {
         JFrame frame = new JFrame();
         frame.setContentPane(createSplitPane());
+        JMenuBar menu = new JMenuBar();
+        menu.add(new JMenu("File"));
+        frame.setJMenuBar(menu);
         return frame;
     }
 
@@ -86,9 +95,7 @@ public class UITest {
     }
 
     private static JComponent createLeft() {
-        JPanel wrapper = new JPanel();
-        BoxLayout wl = new BoxLayout(wrapper, BoxLayout.Y_AXIS);
-        wrapper.setLayout(wl);
+        JPanel wrapper = verticalPanel();
         wrapper.setBorder(createEmptyBorder(5, 0, 0, 0));
         wrapper.add(Boxer.createTopBox("List name", createEmptyBorder()));
 
@@ -110,9 +117,7 @@ public class UITest {
     }
 
     private static JComponent createLeftBottomToolbar() {
-        JPanel jp = new JPanel();
-        BoxLayout bl = new BoxLayout(jp, BoxLayout.X_AXIS);
-        jp.setLayout(bl);
+        JPanel jp = horizontalPanel();
         JButton plus = new JButton("+");
         JButton minus = new JButton("-");
         int max = 0;
@@ -133,15 +138,13 @@ public class UITest {
         jp.add(plus);
 
         jp.add(minus);
-        jp.add(Box.createHorizontalGlue());
+        jp.add(createHorizontalGlue());
         jp.setMaximumSize(new Dimension(jp.getMaximumSize().width, jp.getMinimumSize().height));
         return jp;
     }
 
     private static JComponent createRightBox() {
-        JPanel jp = new JPanel();
-        BoxLayout bl = new BoxLayout(jp, BoxLayout.Y_AXIS);
-        jp.setLayout(bl);
+        JPanel jp = verticalPanel();
         jp.add(Boxer.createTopBox("Panel use instructions", createMatteBorder(0, 0, 1, 0, jp.getBackground().darker())));
         jp.add(createContent());
         jp.add(Box.createVerticalGlue());
@@ -156,60 +159,115 @@ public class UITest {
     }
 
     public static Component createContent() {
-        JPanel jp = new JPanel();
-        BoxLayout bl = new BoxLayout(jp, BoxLayout.Y_AXIS);
-        jp.setLayout(bl);
-        jp.add(createForm1());
-        jp.add(Box.createVerticalStrut(10));
-        jp.add(createForm2());
-        jp.add(Box.createVerticalStrut(10));
-        jp.add(createForm3());
+        JPanel jp = verticalPanel();
+        jp.setBorder(createEmptyBorder(5, 5 , 5, 5));
+
+        // master labels
+        JLabel labelMaster1 = createFormLabel("Master1", TextAttribute.WEIGHT_BOLD);
+        JLabel labelMaster2 = createFormLabel("2", TextAttribute.WEIGHT_BOLD);
+        JLabel labelMaster3 = createFormLabel("Master 3 label", TextAttribute.WEIGHT_BOLD);
+
+        int masterWidth = equaliseWidth(labelMaster1, labelMaster2, labelMaster3);
+        masterWidth += HORIZONTAL_SPACER_WIDTH;
+
+        // master 1
+        JPanel mp1 = createMasterPanel(jp, labelMaster1);
+        addChildren1(mp1, masterWidth);
+        jp.add(createSeparatorPanel());
+
+        // master 2
+        JPanel mp2 = createMasterPanel(jp, labelMaster2);
+        addChildren2(mp2, masterWidth);
+        jp.add(createSeparatorPanel());
+
+        // master 3
+        JPanel mp3 = createMasterPanel(jp, labelMaster3);
+        addChildren2(mp3, masterWidth);
+
         return jp;
     }
 
-    public static JPanel createForm1() {
-        JPanel jp = new JPanel();
-        BoxLayout bl = new BoxLayout(jp, BoxLayout.X_AXIS);
-        jp.setLayout(bl);
-        jp.add(new JButton("one1"));
-        jp.add(new JButton("two1"));
-        jp.add(new JButton("three1"));
-        jp.add(Box.createHorizontalGlue());
+    private static void addChildren1(JPanel parent, int masterLabelWidth) {
+        JLabel labelChild1 = createFormLabel("Child1");
+        addChildEntry(parent, labelChild1, masterLabelWidth);
+
+        JLabel labelChild2 = createFormLabel("2");
+        addChildEntry(parent, labelChild2, masterLabelWidth);
+
+        JLabel labelChild3 = createFormLabel("Child 3 label");
+        addChildEntry(parent, labelChild3, masterLabelWidth);
+
+        equaliseWidth(labelChild1, labelChild2, labelChild3);
+    }
+
+    private static void addChildren2(JPanel parent, int masterLabelWidth) {
+        JLabel labelChild1 = createFormLabel("Child1");
+        addChildEntry(parent, labelChild1, masterLabelWidth);
+
+        JLabel labelChild2 = createFormLabel("2");
+        addChildEntry(parent, labelChild2, masterLabelWidth);
+
+        equaliseWidth(labelChild1, labelChild2);
+    }
+
+    private static void addChildEntry(JPanel parent, JLabel label, int masterLabelWidth) {
+        JPanel panel = horizontalPanel(parent);
+        panel.add(slimHorizontalStrut(masterLabelWidth));
+        panel.add(label);
+        panel.add(slimHorizontalStrut());
+        panel.add(new JCheckBox());
+        panel.add(createHorizontalGlue());
+    }
+
+    private static JPanel createMasterPanel(JPanel parent, JLabel label) {
+        JPanel jp = verticalPanel(parent);
+//        jp.setBorder(createMatteBorder(1, 1, 1, 1, jp.getBackground().darker()));
+
+        JPanel panel = horizontalPanel(jp);
+        panel.add(label);
+        panel.add(slimHorizontalStrut());
+        panel.add(new JCheckBox());
+        panel.add(createHorizontalGlue());
+
         return jp;
     }
 
-    public static JPanel createForm2() {
-        JPanel jp = new JPanel();
-        BoxLayout bl = new BoxLayout(jp, BoxLayout.X_AXIS);
-        jp.setLayout(bl);
-        jp.add(new JButton("one2"));
-        jp.add(new JButton("two2"));
-        jp.add(new JButton("three2"));
-        jp.add(Box.createHorizontalGlue());
-        return jp;
+    private static JPanel createSeparatorPanel() {
+        JPanel panel = horizontalPanel();
+        panel.add(createHorizontalGlue());
+        panel.setBorder(
+                createCompoundBorder(
+                        createEmptyBorder(0, 0, 12, 0),
+                        createCompoundBorder(
+                                createMatteBorder(0, 0, 1, 0, panel.getBackground().darker()),
+                                createEmptyBorder(12, 0, 0, 0))));
+        return panel;
     }
 
-    public static JPanel createForm3() {
-        JPanel jp = new JPanel();
-        BoxLayout bl = new BoxLayout(jp, BoxLayout.X_AXIS);
-        jp.setLayout(bl);
-        jp.add(new JButton("one3"));
-        jp.add(new JButton("two3"));
-        jp.add(new JButton("three3"));
-        jp.add(Box.createHorizontalGlue());
-        return jp;
+    private static JLabel createFormLabel(String text) {
+        return createFormLabel(text, TextAttribute.WEIGHT_REGULAR);
+    }
+
+    private static JLabel createFormLabel(String text, float weight) {
+        JLabel label = new JLabel(text + ":");
+        Font font = label.getFont().deriveFont(
+                singletonMap(TextAttribute.WEIGHT, weight));
+        label.setFont(font);
+        label.setHorizontalAlignment(SwingConstants.RIGHT);
+        return label;
     }
 
     private static JPanel createButtonsPanel() {
-        JPanel jp = new JPanel();
-        BoxLayout bl = new BoxLayout(jp, BoxLayout.X_AXIS);
-        jp.setLayout(bl);
-        jp.add(new JButton("But"));
-        jp.add(Box.createHorizontalStrut(5));
-        jp.add(new JButton("Button"));
-        jp.add(Box.createHorizontalStrut(5));
-        jp.add(new JButton("Button long"));
-        Boxer.equaliseWidth(jp, JButton.class);
+        JPanel jp = horizontalPanel();
+        JButton button1 = new JButton("But");
+        jp.add(button1);
+        jp.add(slimHorizontalStrut());
+        JButton button2 = new JButton("Button");
+        jp.add(button2);
+        jp.add(slimHorizontalStrut());
+        JButton button3 = new JButton("Button long");
+        jp.add(button3);
+        Boxer.equaliseWidth(button1, button2, button3);
         return jp;
     }
 
