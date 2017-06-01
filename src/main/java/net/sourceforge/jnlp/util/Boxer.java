@@ -14,6 +14,8 @@ import static javax.swing.BorderFactory.*;
 public class Boxer {
 
     public static final int HORIZONTAL_SPACER_WIDTH = 5;
+    public static final int VERTICAL_SPACER_HEIGHT = 12;
+    public static final int HORIZONTAL_ENDER_WIDTH = 12;
 
     private static final java.util.List<Color> COLORS = Arrays.asList(
             Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW,
@@ -73,7 +75,7 @@ public class Boxer {
                 if (child instanceof JPanel /* || child instanceof JButton */) {
                     Color co = COLORS.get(i % COLORS.size());
                     i += 1;
-                    jchild.setBorder(createCompoundBorder(createMatteBorder(1,1,1,1, co), jchild.getBorder()));
+                    jchild.setBorder(createCompoundBorder(createMatteBorder(1, 1, 1, 1, co), jchild.getBorder()));
                     jchild.setToolTipText(jchild.getSize().width + "," + jchild.getSize().height);
                 }
             }

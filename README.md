@@ -5,5 +5,8 @@ Policy editor form implementation extracted from [icedtea-web](http://icedtea.cl
 
 Open UI form:
 
-    git clone https://github.com/akashche/policy-editor-ui
-    mvn test
+    mvn test -Dtest=LayoutTest
+ 
+Open original form:
+
+    mvn test -Dtest=OrigTest
